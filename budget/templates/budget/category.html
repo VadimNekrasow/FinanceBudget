@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<div class="container row" id="app_category">
+    <div class="col-3 ml-auto">
+        <h4>Мои категории</h4>
+        <ul class="list-group">
+            {% if category_list %}
+            {% for category in category_list %}
+            <a href="#!" class="list-group-item list-group-item-action">{{category.id}} {{category}}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+                        v-on:click="delete_category({{category.id}}, '{{category.name}}')">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </a>
+            {% endfor %}
+            {% else %}
+            <p class="text-muted">У Вас нет категорий</p>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="col-6 mr-auto  v-divider">
+        <h4>Добавить новую категорию</h4>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-1">{{field}}</div>
+            {% endfor %}
+
+            {% for error in form.errors.values %}
+            {{error}}
+            {% endfor %}
+            {{form.non_field_errors}}
+            <input type="submit" value="Сохранить" class="btn btn-success btn-block">
+        </form>
+    </div>
+
+
+</div>
+{% endblock content %}

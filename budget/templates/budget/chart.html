@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<div id="app-statistic">
+    <div class="mt-3">
+        <div class="btn-group btn-group-toggle mb-1" data-toggle="buttons">
+            <label class="btn btn-outline-success active">
+                <input type="radio" value="0" name="type_pay" id="type_pay_0" v-model="state_radio"
+                       v-on:change="radio_changed"
+                > Расход
+            </label>
+            <label class="btn btn-outline-success">
+                <input type="radio" value="1" name="type_pay" id="type_pay_1" v-model="state_radio"
+                       v-on:change="radio_changed"
+                > Доход
+            </label>
+        </div>
+
+        <div class="btn-group btn-group-toggle mb-1" data-toggle="buttons">
+            <label class="btn btn-outline-success active">
+                <input type="radio" value="0" name="type_date" id="type_date_0" v-model="state_calendar"
+                       v-on:change="type_date_changed">Месяц
+            </label>
+            <label class="btn btn-outline-success">
+                <input type="radio" value="1" name="type_date" id="type_date_1" v-model="state_calendar"
+                       v-on:change="type_date_changed">Год
+            </label>
+        </div>
+
+        <div class="mt-1">
+            <input v-if="state_calendar==1"
+                   type="number"
+                   min="1970"
+                   max="2100"
+                   v-bind:value="current_year()"
+                   class="form-control">
+            <input v-else
+                   type="month"
+                   v-bind:value="current_date()"
+                   class="form-control">
+
+
+        </div>
+
+        <canvas id="chart" height="100%">
+
+        </canvas>
+    </div>
+</div>
+{% endblock content %}
