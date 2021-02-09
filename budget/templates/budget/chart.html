@@ -34,18 +34,19 @@
                    type="number"
                    min="1970"
                    max="2100"
-                   v-bind:value="current_year()"
+                   v-model='calendar_date'
                    class="form-control"
-                   id="date-by-year"
-                   v-on:change="date_change($event)">
-            <input v-else
+                   id='date-by-year'
+                   v-on:change="date_change()">
+            <input v-if="state_calendar==0"
                    type="month"
-                   v-bind:value="current_date()"
+                   v-model='calendar_date'
                    id="date-by-year-month"
                    class="form-control"
-                   v-on:change="date_change($event)">
+                   v-on:change="date_change()">
         </div>
 
+        <h3 class="font-weight-light" v-if='data_is_empty'>Операции за выбранную дату отсутствуют</h3>
         <canvas id="chart" height="100%">
 
         </canvas>

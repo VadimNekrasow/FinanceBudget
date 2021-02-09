@@ -14,7 +14,7 @@ from django.db.models import Sum, Count
 from django.contrib.auth.models import User
 
 from .forms import OperationForm, CategoryForm
-from .models import Category, Operation
+from .models import Category, Operation, Family
 
 # Create your views here.
 colors = [
@@ -22,16 +22,32 @@ colors = [
     ['#0E966D', '#1CC40A', '#CCC900', '#E3A40B', '#D9550B'],
 ]
 
+def family_view(request):
+    family = Family.objects.get(users=request.user)
+    print()
+    print(family)
+    print()
+    return render(request, 'budget/family.html', {'family': family})
+
 
 def get_data_for_chart(request):
     if request.user.is_anonymous:
         raise PermissionDenied
 
     type_pay = int(request.GET.get('type_pay', 0))
+    year = int(request.GET.get('year', datetime.datetime.now().year))
+    month = int(request.GET.get('month', -1))
+
+
 
     data = Operation.objects.values('category__name').filter(category__type_pay=type_pay,
                                                              user__id=request.user.id
-                                                             ).annotate(total=(Sum('value')))
+                                                             )#.annotate(total=(Sum('value')))
+    if month == -1:
+        data = data.filter(date__year=year)
+    else:
+        data = data.filter(date__year=year, date__month=month)
+    data = data.annotate(total=(Sum('value')))
     data = list(data)
 
     for i in range(len(data)):

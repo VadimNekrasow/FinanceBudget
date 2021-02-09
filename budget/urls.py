@@ -1,7 +1,7 @@
 from django.urls import path, include
 
 from .views import index, OperationListView, category_view, update_operation, OperationUpdate, \
-    delete_category, get_data_for_chart, delete_operation, view_chart
+    delete_category, get_data_for_chart, delete_operation, view_chart, family_view
 
 urlpatterns = [
     path('ajax/<int:pk>/delete/', delete_category, name='b-ajax-delete-operation'),
@@ -12,7 +12,7 @@ urlpatterns = [
     path('operation/<int:pk>/', OperationUpdate.as_view(), name='b-operation-update'),
     path('operation/', OperationListView.as_view(), name='b-list-operation'),
 
-
+    path('family/', family_view, name='b-family'),
     path('category/', category_view, name='b-category'),
     path('', index, name='b-index'),
 ]

@@ -75,22 +75,21 @@ var app_statistic = new Vue({
         state_calendar: 0,
         state_radio: 0,
         chart: null,
+        data_is_empty: false,
+        calendar_date: null,
     },
     methods: {
         get_format(){
              var get_parameters = '';
-             if (this.state_calendar==1){
-                value = document.getElementById('date-by-year').value;
-                get_parameters += '?year=' + value;
+             if (this.state_calendar=='1'){
+                get_parameters += '?year=' + this.calendar_date;//document.getElementById('date-by-year').value;
              }else{
-                value = document.getElementById('date-by-year-month').value;
-                date = value.split('-');
+                date = this.calendar_date.split('-');//document.getElementById('date-by-year-month').value.split('-');
                 get_parameters += '?year=' + date[0] + '&month=' + date[1];
              }
              get_parameters += '&type_pay=' + this.state_radio;
              return get_parameters;
         },
-
         current_date(){
             var now = new Date();
             return (now.toLocaleString("en-US", {year: 'numeric'}) + '-' +now.toLocaleString("en-US", {month: '2-digit'}));
@@ -99,7 +98,6 @@ var app_statistic = new Vue({
             var now = new Date();
             return (now.toLocaleString('en-Us', {year: 'numeric'}));
         },
-
         create_chart(){
             var ctx = document.getElementById('chart')//.getContext('2d');
             this.chart = new Chart(ctx, {
@@ -120,15 +118,26 @@ var app_statistic = new Vue({
         },
 
         type_date_changed(){
+            if (this.state_calendar=='1'){
+                this.calendar_date = this.current_year();
+            }else{
+                this.calendar_date = this.current_date();
+            }
             this.update_chart();
         },
 
-        date_change(event){
+        date_change(){
             this.update_chart();
         },
 
         update_chart(){
             sendRequest('/ajax/chart/' + this.get_format(), 'get').then((response)=>{
+                if (response.data.data.length > 0){
+                    this.data_is_empty = false;
+                }else{
+                    this.data_is_empty = true;
+                }
+
                 this.chart.data.labels = [];
                 this.chart.data.datasets[0].data = [];
                 this.chart.data.datasets[0].backgroundColor = [];
@@ -145,6 +154,7 @@ var app_statistic = new Vue({
         },
     },
     mounted(){
+        this.calendar_date = this.current_date();
         this.create_chart();
     }
 
