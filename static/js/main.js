@@ -77,6 +77,20 @@ var app_statistic = new Vue({
         chart: null,
     },
     methods: {
+        get_format(){
+             var get_parameters = '';
+             if (this.state_calendar==1){
+                value = document.getElementById('date-by-year').value;
+                get_parameters += '?year=' + value;
+             }else{
+                value = document.getElementById('date-by-year-month').value;
+                date = value.split('-');
+                get_parameters += '?year=' + date[0] + '&month=' + date[1];
+             }
+             get_parameters += '&type_pay=' + this.state_radio;
+             return get_parameters;
+        },
+
         current_date(){
             var now = new Date();
             return (now.toLocaleString("en-US", {year: 'numeric'}) + '-' +now.toLocaleString("en-US", {month: '2-digit'}));
@@ -106,11 +120,15 @@ var app_statistic = new Vue({
         },
 
         type_date_changed(){
+            this.update_chart();
+        },
 
+        date_change(event){
+            this.update_chart();
         },
 
         update_chart(){
-            sendRequest('/ajax/chart?type_pay=' + this.state_radio + '', 'get').then((response)=>{
+            sendRequest('/ajax/chart/' + this.get_format(), 'get').then((response)=>{
                 this.chart.data.labels = [];
                 this.chart.data.datasets[0].data = [];
                 this.chart.data.datasets[0].backgroundColor = [];
@@ -121,7 +139,6 @@ var app_statistic = new Vue({
                     this.chart.data.datasets[0].data.push(parseFloat(item.total));
                     this.chart.data.datasets[0].backgroundColor.push(item.color);
                 }
-
                 this.chart.update();
 
             });

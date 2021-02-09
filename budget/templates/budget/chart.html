@@ -35,13 +35,15 @@
                    min="1970"
                    max="2100"
                    v-bind:value="current_year()"
-                   class="form-control">
+                   class="form-control"
+                   id="date-by-year"
+                   v-on:change="date_change($event)">
             <input v-else
                    type="month"
                    v-bind:value="current_date()"
-                   class="form-control">
-
-
+                   id="date-by-year-month"
+                   class="form-control"
+                   v-on:change="date_change($event)">
         </div>
 
         <canvas id="chart" height="100%">
