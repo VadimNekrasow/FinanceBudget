@@ -5,3 +5,6 @@ Category.objects.filter( (Q(user_id=None) | Q(user_id=0)) & (Q(type_pay=0)))
 {{ value|default:"nothing" }}
 u1.operations.filter(category__type_pay=1).aggregate(sum=Sum('value'))
 
+o_list = Operation.objects.filter(user__in=f_users).order_by('-date', '-id')
+
+

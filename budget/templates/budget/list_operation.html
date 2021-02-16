@@ -1,19 +1,11 @@
 {% extends 'base.html' %}
 
+{% block title %}Мои финансы | {{block.super}}{% endblock title %}
 
 {% block content %}
 
-
+{% include 'budget/base_operation_include.html' %}
 <div id="list-operation">
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link" v-bind:class="{active: state }" href="#" v-on:click="state=true">Расходы</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" v-bind:class="{active: !state}" v-on:click="state=false">Графическая сводка</a>
-        </li>
-    </ul>
-
     <div id="app_category">
         <div class="d-flex">
             <span class="display-4 {% if total > 0%}text-success{% elif total < 0%}text-danger{% endif %} my-3">{{total|floatformat:2}}</span>
@@ -37,14 +29,14 @@
         <h5 class="bg-info p-2 text-dark my-2">{{operation.date}}</h5>
         {% endifchanged %}
 
-        <div class="shadow-sm mt-2 bg-light">
+        <div class="shadow-sm mt-2 bg-light div-hover border">
             <div class="container py-1">
                  <button type="button"
                          class="close"
                          data-dismiss="alert"
                          aria-label="Close"
                          v-on:click="delete_operation({{operation.id}}, '{% url 'b-operation-delete' operation.id %}')">
-                     <span aria-hidden="true"><i class="bi bi-x-circle"></i></span>
+                     <span aria-hidden="true"><i class="bi bi-x-circle red-hover"></i></span>
                  </button>
                 <a class="close mr-1" href="{% url 'b-operation-update' operation.id %}">
                      <span aria-hidden="true"><i class="bi bi-pencil"></i></span>

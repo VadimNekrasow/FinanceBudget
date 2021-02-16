@@ -2,5 +2,45 @@
 
 
 {% block content %}
-<button type="button" class="btn btn-outline-info"><i class="bi bi-plus" style="font-size: 2rem;"></i>Info</button>
+<div class="mb-3">
+    <div class="list-group">
+
+    {% if not families %}
+        <p class="text-muted">Вы не состоите в семье</p>
+    {% endif %}
+    {% for f in families %}
+      <a href="{% url 'b-family' %}?fid={{f.id}}" class="list-group-item {% if family == f %}bg-light{% endif %}">{{f}}</a>
+    {% endfor %}
+    </div>
+
+    <a class="" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+        Создать +
+    </a>
+    <div class="collapse" id="collapseExample">
+      <div class="card card-body">
+          <form method="post" class="form-inline">
+              {% csrf_token %}
+              <input type="text" name="name" placeholder="Название" class="form-control form-control-sm" required>
+              <input type="submit" class="btn btn-sm btn-outline-success ml-1">
+          </form>
+      </div>
+    </div>
+
+
+    <div class="d-flex">
+        <span class="display-4 {% if total > 0%}text-success{% elif total < 0%}text-danger{% endif %} my-3">{{total|floatformat:2}}</span>
+    </div>
+
+    {% if not operations %}
+        <hr>
+        <h3 class="font-weight-light">Операции за выбранный месяц отсутствуют</h3>
+    {% endif %}
+
+    {% for operation in operations %}
+        {% ifchanged operation.date %}
+            <h5 class="bg-info p-2 text-dark my-2">{{operation.date}}</h5>
+        {% endifchanged %}
+        {% include 'budget/include/cart_operation_family.html' %}
+    {% endfor %}
+</div>
 {% endblock content %}

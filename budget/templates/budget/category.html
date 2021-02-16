@@ -1,14 +1,19 @@
 {% extends 'base.html' %}
 
+{% block title %}Мои категории | {{block.super}}{% endblock title %}
 
 {% block content %}
-<div class="container row" id="app_category">
+
+{% include 'budget/base_operation_include.html' %}
+
+<div class="container row mt-3" id="app_category">
     <div class="col-3 ml-auto">
         <h4>Мои категории</h4>
         <ul class="list-group">
             {% if category_list %}
             {% for category in category_list %}
-            <a href="#!" class="list-group-item list-group-item-action">{{category.id}} {{category}}
+            <a href="#!"
+               class="list-group-item list-group-item-action {% if category.type_pay%}text-success{%else%}text-danger{%endif%}">{{category}}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"
                         v-on:click="delete_category({{category.id}}, '{{category.name}}')">
                     <span aria-hidden="true">&times;</span>

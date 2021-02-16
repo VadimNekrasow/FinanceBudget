@@ -1,0 +1,35 @@
+<form method="post" action="/">
+    {% csrf_token %}
+
+    <div class="mb-1">{{form.value}}</div>
+    <div class="mb-1">{{form.description}}</div>
+
+    {% verbatim %}
+    <div class="btn-group btn-group-toggle mb-1" data-toggle="buttons">
+        <label class="btn btn-outline-success active">
+            <input type="radio" value="0" name="type_pay" id="type_pay_0" v-model="state_type_pay"
+                   v-on:change="changed_type_pay()"> Расход
+        </label>
+        <label class="btn btn-outline-success">
+            <input type="radio" value="1" name="type_pay" id="type_pay_1" v-model="state_type_pay"
+                   v-on:change="changed_type_pay()"> Доход
+        </label>
+    </div>
+
+    <select name="category" id="id_category" class="custom-select">
+        <template v-for="option in options">
+            <option v-bind:value="option.id">{{option.name}}</option>
+        </template>
+    </select>
+    {% endverbatim %}
+
+    <hr>
+    <div class="d-flex justify-content-end">
+        <input type="submit" class="btn btn-sm btn-outline-success">
+    </div>
+
+
+    {% for error in form.errors.values %}
+    {{error}}
+    {% endfor %}
+</form>

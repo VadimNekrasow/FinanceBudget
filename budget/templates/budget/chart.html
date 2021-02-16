@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
+{% block title %}Графическая сводка | {{block.super}}{% endblock title %}
 
 {% block content %}
+
+{% include 'budget/base_operation_include.html' %}
 
 <div id="app-statistic">
     <div class="mt-3">
@@ -47,7 +50,7 @@
         </div>
 
         <h3 class="font-weight-light" v-if='data_is_empty'>Операции за выбранную дату отсутствуют</h3>
-        <canvas id="chart" height="100%">
+        <canvas id="chart" height="100%" class="mt-3">
 
         </canvas>
     </div>

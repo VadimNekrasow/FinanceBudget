@@ -1,4 +1,4 @@
-import datetime
+import datetime, time
 from pprint import pprint
 
 from django.shortcuts import render, redirect
@@ -16,21 +16,56 @@ from django.contrib.auth.models import User
 from .forms import OperationForm, CategoryForm
 from .models import Category, Operation, Family
 
-# Create your views here.
 colors = [
     ['#A35EEB', '#EBB76A', '#525AEB', '#EAEB3B', '#46A5EB'],
     ['#0E966D', '#1CC40A', '#CCC900', '#E3A40B', '#D9550B'],
 ]
 
+
+# Create your views here.
+
+
+def get_category_by_ajax(request):
+    """Получение категорий по ajax"""
+    if request.user.is_anonymous:
+        raise PermissionDenied
+    if request.is_ajax():
+        type_pay = request.GET.get('type_pay', 0)
+        categories = list(Category.objects.filter(type_pay=type_pay).values('id', 'name').order_by('name'))
+        return JsonResponse({'categories': categories}, status=200)
+
+
 def family_view(request):
-    family = Family.objects.get(users=request.user)
-    print()
-    print(family)
-    print()
-    return render(request, 'budget/family.html', {'family': family})
+    # families = Family.objects.filter(users=request.user)
+    # family_id = request.GET.get('fid', families[0].id)
+    # family = families.get(id=family_id)
+    #
+    # operations = Operation.objects.filter(user__in=family.users.all()).order_by('-date', '-id')
+    # total = operations.filter(category__type_pay=1).aggregate(total=Sum('value'))['total']
+    # total_cost = operations.filter(category__type_pay=0).aggregate(total=Sum('value'))['total']
+    # if total is None:
+    #     total = 0
+    # if total_cost is None:
+    #     total_cost = 0
+    # total -= total_cost
+    #
+    # context = {
+    #     'family': family,
+    #     'families': families,
+    #     'operations': operations,
+    #     'total': total,
+    # }
+
+    families = Family.objects.filter(users=request.user)
+    context = {
+        'families': families,
+    }
+
+    return render(request, 'budget/family.html', context=context)
 
 
 def get_data_for_chart(request):
+    """Получение данных для построения диаграммы. ajax"""
     if request.user.is_anonymous:
         raise PermissionDenied
 
@@ -38,11 +73,9 @@ def get_data_for_chart(request):
     year = int(request.GET.get('year', datetime.datetime.now().year))
     month = int(request.GET.get('month', -1))
 
-
-
     data = Operation.objects.values('category__name').filter(category__type_pay=type_pay,
-                                                             user__id=request.user.id
-                                                             )#.annotate(total=(Sum('value')))
+                                                             user__id=request.user.id)
+    # .annotate(total=(Sum('value')))
     if month == -1:
         data = data.filter(date__year=year)
     else:
@@ -58,10 +91,12 @@ def get_data_for_chart(request):
 
 
 def view_chart(request):
+    """Отображание страницы с пустой диаграммой"""
     return render(request, 'budget/chart.html')
 
 
 def delete_category(request, pk):
+    """Удаление категории. Вызов происходит при помощи ajax"""
     if request.user.is_anonymous:
         raise PermissionDenied
     category = Category.objects.get(id=pk)
@@ -73,6 +108,7 @@ def delete_category(request, pk):
 
 
 def delete_operation(request, pk):
+    """Удаление операции. Вызов происходит при помощи ajax"""
     if request.user.is_anonymous:
         raise PermissionDenied
     operation = Operation.objects.get(id=pk)
@@ -96,8 +132,30 @@ def category_view(request):
             return redirect('/category/')
         else:
             form = bound_form
-    category_list = Category.objects.filter(user_id=request.user.id).order_by('name', 'type_pay')
+    category_list = Category.objects.filter(user_id=request.user.id).order_by('type_pay', 'name')
     return render(request, 'budget/category.html', {'form': form, 'category_list': category_list})
+
+
+class CategoryCreateView(CreateView):
+    template_name = 'budget/category.html'
+    form_class = CategoryForm
+    model = Category
+    success_url = reverse_lazy('b-category')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        category_list = Category.objects.filter(user_id=self.request.user.id).order_by('type_pay', 'name')
+        context.update({'category_list': category_list})
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial'].update({'user_id': self.request.user.id})
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.user_id = form.cleaned_data['user_id']
+        return super().form_valid(form)
 
 
 def index(request):
@@ -149,7 +207,6 @@ class OperationUpdate(UpdateView):
         context.update({'form_data': form_data})
         pprint(context)
         return context
-
 
     def get_success_url(self):
         return '/operation/' + str(self.object.pk) + '/'
