@@ -3,7 +3,13 @@ from django.forms import ValidationError
 
 from unidecode import unidecode
 
-from .models import Operation, Category
+from .models import Operation, Category, Family
+
+
+class FamilyForm(forms.ModelForm):
+    class Meta:
+        model = Family
+        fields = ['name']
 
 
 class OperationForm(forms.ModelForm):

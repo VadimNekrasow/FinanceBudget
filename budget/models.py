@@ -18,7 +18,7 @@ class Category(models.Model):
     def __str__(self):
         return self.name  # + " | " + self.get_type_pay_display()
 
-    #class Meta:
+    # class Meta:
     #    ordering = ['name', 'type_pay']
 
 
@@ -27,19 +27,21 @@ class Operation(models.Model):
     date = models.DateField(auto_now_add=True)
     description = models.CharField(max_length=128, verbose_name="Описание", blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Категория",
-                                 related_name='operations' )
+                                 related_name='operations')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='operations')
 
     def __str__(self):
         return f'{self.value} | {self.category} | {self.date}'
 
-    #class Meta:
-        #ordering = ['-date', '-id']
+    # class Meta:
+    # ordering = ['-date', '-id']
 
 
 class Family(models.Model):
     name = models.CharField(max_length=32, verbose_name="Семья")
-    uuid = models.UUIDField(default=uuid4, editable=False)
+    author = models.ForeignKey(User, verbose_name='Создатель', blank=True, null=True, on_delete=models.CASCADE,
+                               related_name='author_families')
+    uuid = models.UUIDField(default=uuid4, editable=True)
     users = models.ManyToManyField(User, blank=True, related_name='family')
 
     def __str__(self):

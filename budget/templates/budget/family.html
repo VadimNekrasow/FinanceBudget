@@ -3,28 +3,78 @@
 
 {% block content %}
 <div class="mb-3">
-    <div class="list-group">
 
-    {% if not families %}
-        <p class="text-muted">Вы не состоите в семье</p>
+    {% if family %}
+        <div class="">
+            <div class="">
+                <h3 class="mb-0">{{family.name}}</h3>
+            </div>
+            <div class="">
+                <p>Код для приглашения: <i>{{family.uuid}}</i></p>
+            </div>
+        </div>
+        <hr>
+        <h5 class="font-weight-light">Состав</h5>
+        <ul>
+        {% for user in family.users.all %}
+            {% if user == request.user %}
+                <li class="li-none">Вы</li>
+            {% else %}
+                <li class="li-none">{{user}}<a href="#" class="text-danger"><span aria-hidden="true">&times;</span></a></li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+
+        <div class="d-flex justify-content-end">
+            {% if request.user == family.author%}
+                <a href="#" class="ml-1 text-danger">Удалить</a>
+            {% else %}
+                <a href="#" class="">Покинуть</a>
+            {% endif %}
+
+        </div>
+
+    {% else %}
+        <h3 class="text-muted">Вы не состоите в семье</h3>
+        <a class="" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+            Создать или вступить
+        </a>
+        <div class="collapse" id="collapseExample">
+            <div class="card card-body">
+              <form method="post" class="">
+                  {% csrf_token %}
+                  <div class="input-group input-group-sm">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">Создать</span>
+                      </div>
+                      <input type="text" name="name" placeholder="Название" class="form-control form-control-sm w-50" required>
+                      <div class="input-group-append ">
+                          <input type="submit" class="btn btn-sm btn-outline-success">
+                      </div>
+                    </div>
+              </form>
+              <form method="post" class="mt-1">
+                  {% csrf_token %}
+                  <div class="input-group input-group-sm">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">Вступить</span>
+                      </div>
+                      <input type="text" name="uuid" placeholder="Код для приглашения" class="form-control form-control-sm" required>
+                      <div class="input-group-append">
+                          <input type="submit" class="btn btn-sm btn-outline-success">
+                      </div>
+                    </div>
+              </form>
+            </div>
+        </div>
     {% endif %}
-    {% for f in families %}
-      <a href="{% url 'b-family' %}?fid={{f.id}}" class="list-group-item {% if family == f %}bg-light{% endif %}">{{f}}</a>
-    {% endfor %}
-    </div>
 
-    <a class="" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-        Создать +
-    </a>
-    <div class="collapse" id="collapseExample">
-      <div class="card card-body">
-          <form method="post" class="form-inline">
-              {% csrf_token %}
-              <input type="text" name="name" placeholder="Название" class="form-control form-control-sm" required>
-              <input type="submit" class="btn btn-sm btn-outline-success ml-1">
-          </form>
-      </div>
-    </div>
+
+
+
+
+
+
 
 
     <div class="d-flex">

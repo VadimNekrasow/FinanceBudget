@@ -1,4 +1,4 @@
-import datetime, time
+import datetime, time, re
 from pprint import pprint
 
 from django.shortcuts import render, redirect
@@ -13,7 +13,7 @@ from django.db.models import Sum, Count
 
 from django.contrib.auth.models import User
 
-from .forms import OperationForm, CategoryForm
+from .forms import OperationForm, CategoryForm, FamilyForm
 from .models import Category, Operation, Family
 
 colors = [
@@ -31,7 +31,9 @@ def get_category_by_ajax(request):
         raise PermissionDenied
     if request.is_ajax():
         type_pay = request.GET.get('type_pay', 0)
-        categories = list(Category.objects.filter(type_pay=type_pay).values('id', 'name').order_by('name'))
+        categories = list(
+            Category.objects.filter((Q(user_id=None) | Q(user_id=request.user.id)) &
+                                    Q(type_pay=type_pay)).values('id', 'name').order_by('name'))
         return JsonResponse({'categories': categories}, status=200)
 
 
@@ -55,10 +57,24 @@ def family_view(request):
     #     'operations': operations,
     #     'total': total,
     # }
+    if request.user.is_anonymous:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        uuid = request.POST.get('uuid', None)
+        if uuid and re.match(r'[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}', uuid) is not None:
+            family = Family.objects.get(uuid=uuid)
+            family.users.add(request.user)
+            return redirect('b-family')
+        form = FamilyForm(request.POST)
+        if form.is_valid():
+            form.save()
+            form.instance.users.add(request.user)
+            return redirect('b-family')
 
     families = Family.objects.filter(users=request.user)
     context = {
-        'families': families,
+        'family': families[0] if families else None,
     }
 
     return render(request, 'budget/family.html', context=context)

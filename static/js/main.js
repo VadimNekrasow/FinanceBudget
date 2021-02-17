@@ -6,15 +6,15 @@ if (document.getElementById('app_new_operation')){
             options: [],
         },
 
-        created(){
-            var request = sendRequest('/?type_pay=' + this.state_radio + '', 'get').then((response)=>{
+        mounted(){
+            var request = sendRequest('/ajax/category/?type_pay=' + this.state_radio + '', 'get').then((response)=>{
                 this.options = response.data.categories;
             })
         },
 
         methods: {
             radio_changed(){
-                var request = sendRequest('/?type_pay=' + this.state_radio + '', 'get').then((response)=>{
+                var request = sendRequest('/ajax/category/?type_pay=' + this.state_radio + '', 'get').then((response)=>{
                 this.options = response.data.categories;
                 })
             }
@@ -33,13 +33,13 @@ if (document.getElementById('app_update_operation')){
         mounted(){
             this.state_radio = document.getElementById('type_pay').value;
             this.instance = document.getElementById('instance').value;
-            var request = sendRequest('/?type_pay=' + this.state_radio + '', 'get').then((response)=>{
+            var request = sendRequest('/ajax/category/?type_pay=' + this.state_radio + '', 'get').then((response)=>{
                 this.options = response.data.categories;
             })
         },
          methods: {
             radio_changed(){
-                var request = sendRequest('/?type_pay=' + this.state_radio + '', 'get').then((response)=>{
+                var request = sendRequest('/ajax/category/?type_pay=' + this.state_radio + '', 'get').then((response)=>{
                 this.options = response.data.categories;
                 console.log(response.data.categories);
                 })
