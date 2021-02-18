@@ -38,27 +38,8 @@ def get_category_by_ajax(request):
 
 
 def family_view(request):
-    # families = Family.objects.filter(users=request.user)
-    # family_id = request.GET.get('fid', families[0].id)
-    # family = families.get(id=family_id)
-    #
-    # operations = Operation.objects.filter(user__in=family.users.all()).order_by('-date', '-id')
-    # total = operations.filter(category__type_pay=1).aggregate(total=Sum('value'))['total']
-    # total_cost = operations.filter(category__type_pay=0).aggregate(total=Sum('value'))['total']
-    # if total is None:
-    #     total = 0
-    # if total_cost is None:
-    #     total_cost = 0
-    # total -= total_cost
-    #
-    # context = {
-    #     'family': family,
-    #     'families': families,
-    #     'operations': operations,
-    #     'total': total,
-    # }
     if request.user.is_anonymous:
-        raise PermissionDenied
+        return redirect('/')
 
     if request.method == 'POST':
         uuid = request.POST.get('uuid', None)
@@ -68,6 +49,7 @@ def family_view(request):
             return redirect('b-family')
         form = FamilyForm(request.POST)
         if form.is_valid():
+            form.instance.author = request.user
             form.save()
             form.instance.users.add(request.user)
             return redirect('b-family')
@@ -78,6 +60,49 @@ def family_view(request):
     }
 
     return render(request, 'budget/family.html', context=context)
+
+
+def family_operation_view(request):
+    if request.user.is_anonymous:
+        return redirect('/')
+
+    family = Family.objects.get(users=request.user)
+    year = int(request.GET.get('year', datetime.datetime.now().year))
+    month = int(request.GET.get('month', datetime.datetime.now().month))
+
+    operations = Operation.objects.filter(user__in=family.users.all(),
+                                          date__month=month,
+                                          date__year=year).order_by('-date', '-id')
+    total = operations.filter(category__type_pay=1).aggregate(total=Sum('value'))['total']
+    total_cost = operations.filter(category__type_pay=0).aggregate(total=Sum('value'))['total']
+    if total is None:
+        total = 0
+    if total_cost is None:
+        total_cost = 0
+    total -= total_cost
+
+    context = {
+        'family': family,
+        'operations': operations,
+        'total': total,
+        'year': year,
+        'month': str(month).zfill(2),
+    }
+    return render(request, 'budget/family_operation.html', context=context)
+
+
+def delete_user_from_family(request, pk):
+    user = User.objects.get(id=pk)
+    family = Family.objects.get(users=user)
+    if family.author == request.user or user == request.user:
+        family.users.remove(user)
+    return redirect('b-family')
+
+
+def delete_family(request):
+    family = Family.objects.get(author=request.user)
+    family.delete()
+    return redirect('b-family')
 
 
 def get_data_for_chart(request):
@@ -175,41 +200,36 @@ class CategoryCreateView(CreateView):
 
 
 def index(request):
-    if request.is_ajax():
-        type_pay = request.GET.get('type_pay', 0)
-        categories = list(Category.objects.filter(type_pay=type_pay).values('id', 'name').order_by('name'))
-        return JsonResponse({'categories': categories}, status=200)
-
-    if request.method == "POST":
-        bound_form = OperationForm(request.POST)
-        if bound_form.is_valid():
-            bound_form.instance.user_id = request.user.id
-            bound_form.save()
-            return redirect('/')
-        else:
-            return render(request, 'budget/index.html', {'form': bound_form})
-
-    if request.method == "GET":
-        form = OperationForm()
-        # queryset = Category.objects.filter(
-        #    (Q(user_id=None) | Q(user_id=request.user.id)) & (Q(type_pay=request.GET.get('type_pay', 0)))).order_by(
-        #    'name')
-        # form.fields['category'].queryset = queryset
-        return render(request, 'budget/index.html', {'form': form})
+    return render(request, 'budget/index.html')
 
 
-def update_operation(request, pk):
-    operation = Operation.objects.get(pk=pk)
-    form_data = {'type_pay': operation.category.type_pay, 'instance': operation.category_id}
-    form = OperationForm(instance=operation)
+# def operation_create(request):
+#     if request.method == "POST":
+#         bound_form = OperationForm(request.POST)
+#         if bound_form.is_valid():
+#             bound_form.instance.user_id = request.user.id
+#             bound_form.save()
+#             return redirect('/')
+#         else:
+#             return render(request, 'budget/index.html', {'form': bound_form})
+#
+#     if request.method == "GET":
+#         form = OperationForm()
+#         return render(request, 'budget/index.html', {'form': form})
 
-    if request.method == "POST":
-        bound_form = OperationForm(request.POST, instance=operation)
-        if bound_form.is_valid():
-            bound_form.save()
-            return redirect('/operation/' + str(pk) + '/')
 
-    return render(request, 'budget/operation_update.html', {'form': form, 'form_data': form_data})
+# def update_operation(request, pk):
+#     operation = Operation.objects.get(pk=pk)
+#     form_data = {'type_pay': operation.category.type_pay, 'instance': operation.category_id}
+#     form = OperationForm(instance=operation)
+#
+#     if request.method == "POST":
+#         bound_form = OperationForm(request.POST, instance=operation)
+#         if bound_form.is_valid():
+#             bound_form.save()
+#             return redirect('/operation/' + str(pk) + '/')
+#
+#     return render(request, 'budget/operation_update.html', {'form': form, 'form_data': form_data})
 
 
 class OperationUpdate(UpdateView):
@@ -224,15 +244,24 @@ class OperationUpdate(UpdateView):
         pprint(context)
         return context
 
+    def get_form_kwargs(self):
+        if self.object.user != self.request.user:
+            raise PermissionDenied
+        return super().get_form_kwargs()
+
     def get_success_url(self):
-        return '/operation/' + str(self.object.pk) + '/'
+        return reverse_lazy('b-list-operation')
 
 
 class OperationCreate(CreateView):
     form_class = OperationForm
     model = Operation
-    template_name = 'budget/index.html'
+    template_name = 'budget/operation_create.html'
     success_url = reverse_lazy('b-list-operation')
+
+    def form_valid(self, form):
+        form.instance.user_id = self.request.user.id
+        return super().form_valid(form)
 
 
 class OperationListView(LoginRequiredMixin, MonthArchiveView):
