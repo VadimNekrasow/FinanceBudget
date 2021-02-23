@@ -4,7 +4,9 @@ from pprint import pprint
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.http import JsonResponse, Http404
-from django.views.generic import ListView, UpdateView, CreateView
+from django.views.generic import ListView, UpdateView, CreateView, View, TemplateView
+from django.views.generic.base import ContextMixin
+
 from django.db.models import Q, Sum
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.dates import MonthArchiveView
@@ -37,11 +39,35 @@ def get_category_by_ajax(request):
         return JsonResponse({'categories': categories}, status=200)
 
 
-def family_view(request):
-    if request.user.is_anonymous:
-        return redirect('/')
+# def family_view(request):
+#     if request.user.is_anonymous:
+#         return redirect('/')
+#
+#     if request.method == 'POST':
+#         uuid = request.POST.get('uuid', None)
+#         if uuid and re.match(r'[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}', uuid) is not None:
+#             family = Family.objects.get(uuid=uuid)
+#             family.users.add(request.user)
+#             return redirect('b-family')
+#         form = FamilyForm(request.POST)
+#         if form.is_valid():
+#             form.instance.author = request.user
+#             form.save()
+#             form.instance.users.add(request.user)
+#             return redirect('b-family')
+#
+#     families = Family.objects.filter(users=request.user)
+#     context = {
+#         'family': families[0] if families else None,
+#     }
+#
+#     return render(request, 'budget/family.html', context=context)
 
-    if request.method == 'POST':
+
+class FamilyView(LoginRequiredMixin, View):
+    login_url = reverse_lazy('a-login')
+
+    def post(self, request):
         uuid = request.POST.get('uuid', None)
         if uuid and re.match(r'[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}', uuid) is not None:
             family = Family.objects.get(uuid=uuid)
@@ -53,18 +79,19 @@ def family_view(request):
             form.save()
             form.instance.users.add(request.user)
             return redirect('b-family')
+        return redirect('b-family')
 
-    families = Family.objects.filter(users=request.user)
-    context = {
-        'family': families[0] if families else None,
-    }
-
-    return render(request, 'budget/family.html', context=context)
+    def get(self, request):
+        families = Family.objects.filter(users=request.user)
+        context = {
+            'family': families[0] if families else None,
+        }
+        return render(request, 'budget/family.html', context=context)
 
 
 def family_operation_view(request):
     if request.user.is_anonymous:
-        return redirect('/')
+        return redirect('a-login')
 
     family = Family.objects.get(users=request.user)
     year = int(request.GET.get('year', datetime.datetime.now().year))
@@ -99,10 +126,19 @@ def delete_user_from_family(request, pk):
     return redirect('b-family')
 
 
-def delete_family(request):
-    family = Family.objects.get(author=request.user)
-    family.delete()
-    return redirect('b-family')
+# def delete_family(request):
+#     family = Family.objects.get(author=request.user)
+#     family.delete()
+#     return redirect('b-family')
+
+
+class DeleteFamilyView(LoginRequiredMixin, View):
+    login_url = reverse_lazy('a-login')
+
+    def get(self, request):
+        family = Family.objects.get(author=request.user)
+        family.delete()
+        return redirect('b-family')
 
 
 def get_data_for_chart(request):
@@ -131,9 +167,14 @@ def get_data_for_chart(request):
     return JsonResponse({'data': data}, status=200)
 
 
-def view_chart(request):
-    """Отображание страницы с пустой диаграммой"""
-    return render(request, 'budget/chart.html')
+# def view_chart(request):
+#     """Отображание страницы с пустой диаграммой"""
+#     return render(request, 'budget/chart.html')
+
+
+class ChartView(LoginRequiredMixin, TemplateView):
+    login_url = reverse_lazy('a-login')
+    template_name = 'budget/chart.html'
 
 
 def delete_category(request, pk):
@@ -160,43 +201,21 @@ def delete_operation(request, pk):
         return JsonResponse({'result': 'bad'}, status=200)
 
 
-def category_view(request):
-    if request.user.is_anonymous:
-        return redirect('/')
-
-    form = CategoryForm(initial={'user_id': request.user.id})
-    if request.method == "POST":
-        bound_form = CategoryForm(request.POST)
-        if bound_form.is_valid():
-            bound_form.instance.user = request.user
-            bound_form.save()
-            return redirect('/category/')
-        else:
-            form = bound_form
-    category_list = Category.objects.filter(user_id=request.user.id).order_by('type_pay', 'name')
-    return render(request, 'budget/category.html', {'form': form, 'category_list': category_list})
-
-
-class CategoryCreateView(CreateView):
-    template_name = 'budget/category.html'
-    form_class = CategoryForm
-    model = Category
-    success_url = reverse_lazy('b-category')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        category_list = Category.objects.filter(user_id=self.request.user.id).order_by('type_pay', 'name')
-        context.update({'category_list': category_list})
-        return context
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['initial'].update({'user_id': self.request.user.id})
-        return kwargs
-
-    def form_valid(self, form):
-        form.instance.user_id = form.cleaned_data['user_id']
-        return super().form_valid(form)
+# def category_view(request):
+#     if request.user.is_anonymous:
+#         return redirect('/')
+#
+#     form = CategoryForm(initial={'user_id': request.user.id})
+#     if request.method == "POST":
+#         bound_form = CategoryForm(request.POST)
+#         if bound_form.is_valid():
+#             bound_form.instance.user = request.user
+#             bound_form.save()
+#             return redirect('/category/')
+#         else:
+#             form = bound_form
+#     category_list = Category.objects.filter(user_id=request.user.id).order_by('type_pay', 'name')
+#     return render(request, 'budget/category.html', {'form': form, 'category_list': category_list})
 
 
 def index(request):
@@ -232,7 +251,8 @@ def index(request):
 #     return render(request, 'budget/operation_update.html', {'form': form, 'form_data': form_data})
 
 
-class OperationUpdate(UpdateView):
+class OperationUpdate(LoginRequiredMixin, UpdateView):
+    login_url = reverse_lazy('a-login')
     form_class = OperationForm
     model = Operation
     template_name = 'budget/operation_update.html'
@@ -253,7 +273,8 @@ class OperationUpdate(UpdateView):
         return reverse_lazy('b-list-operation')
 
 
-class OperationCreate(CreateView):
+class OperationCreate(LoginRequiredMixin, CreateView):
+    login_url = reverse_lazy('a-login')
     form_class = OperationForm
     model = Operation
     template_name = 'budget/operation_create.html'
@@ -265,7 +286,7 @@ class OperationCreate(CreateView):
 
 
 class OperationListView(LoginRequiredMixin, MonthArchiveView):
-    login_url = '/'
+    login_url = reverse_lazy('a-login')
     model = Operation
     template_name = 'budget/list_operation.html'
     context_object_name = 'list_operation'
@@ -303,3 +324,26 @@ class OperationListView(LoginRequiredMixin, MonthArchiveView):
         total -= total_cost
         context.update({'total': total})
         return context
+
+
+class CategoryCreateView(LoginRequiredMixin, CreateView):
+    login_url = reverse_lazy('a-login')
+    template_name = 'budget/category.html'
+    form_class = CategoryForm
+    model = Category
+    success_url = reverse_lazy('b-category')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        category_list = Category.objects.filter(user_id=self.request.user.id).order_by('type_pay', 'name')
+        context.update({'category_list': category_list})
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial'].update({'user_id': self.request.user.id})
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.user_id = form.cleaned_data['user_id']
+        return super().form_valid(form)

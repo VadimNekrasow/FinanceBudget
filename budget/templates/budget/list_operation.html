@@ -10,13 +10,16 @@
         <div class="d-flex">
             <span class="display-4 {% if total > 0%}text-success{% elif total < 0%}text-danger{% endif %} my-3">{{total|floatformat:2}}</span>
         </div>
-        <div class="d-flex">
+        <div class="d-flex align-items-center">
             <div class="">
                 <input
                 type="month"
                 value="{{month|date:'Y-m'}}"
                 class="form-control"
                 onchange="month_change(this.value, '{{request.path}}')">
+            </div>
+            <div class="ml-2">
+                <a href="{% url 'b-operation-create'%}">Добавить</a>
             </div>
         </div>
 
@@ -48,7 +51,7 @@
                 {% else %}
                 <h4 class="text-danger">{{operation.value}}</h4>
                 {% endif %}
-                <p>{{operation.description|default:operation.category.name}} ({{operation.id}})</p>
+                <p>{{operation.description|default:operation.category.name}}</p>
             </div>
         </div>
         {% endfor %}

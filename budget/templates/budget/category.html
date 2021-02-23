@@ -7,7 +7,7 @@
 {% include 'budget/include/operation_tabs.html' %}
 
 <div class="container row mt-3" id="app_category">
-    <div class="col-3 ml-auto">
+    <div class="col-9 col-md-3 ml-md-auto">
         <h4>Мои категории</h4>
         <ul class="list-group">
             {% if category_list %}
@@ -25,7 +25,7 @@
             {% endif %}
         </ul>
     </div>
-    <div class="col-6 mr-auto  v-divider">
+    <div class="col-9 col-md-6 mr-md-auto  v-divider">
         <h4>Добавить новую категорию</h4>
         <form method="post">
             {% csrf_token %}

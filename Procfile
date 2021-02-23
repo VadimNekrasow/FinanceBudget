@@ -1,0 +1,1 @@
+web: gunicorn ShortUrl.wsgi --log-file -

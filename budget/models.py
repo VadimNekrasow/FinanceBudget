@@ -27,11 +27,11 @@ class Operation(models.Model):
     date = models.DateField(auto_now_add=True)
     description = models.CharField(max_length=128, verbose_name="Описание", blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Категория",
-                                 related_name='operations')
+                                 related_name='operations', null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='operations')
 
     def __str__(self):
-        return f'{self.value} | {self.category} | {self.date}'
+        return f'{self.value} | {self.category} | {self.date} | {self.user}'
 
     # class Meta:
     # ordering = ['-date', '-id']

@@ -24,7 +24,12 @@
             {% if user == request.user %}
                 <li class="li-none">Вы {% if user == family.author %} (администратор) {% endif %}</li>
             {% else %}
-                <li class="li-none">{{user}}
+                <li class="li-none">
+                    {% if user.first_name %}
+                        {{user.first_name}} {{user.last_name}}
+                    {% else %}
+                        {{user}}
+                    {% endif %}
                     {% if user == family.author %}
                         (администратор)
                     {% endif %}
