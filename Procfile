@@ -1,1 +1,1 @@
-web: gunicorn financebudget.wsgi --log-file -
+web: gunicorn FinanceBudget.wsgi --log-file -
