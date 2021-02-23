@@ -1,1 +1,1 @@
-web: gunicorn ShortUrl.wsgi --log-file -
+web: gunicorn financebudget.wsgi --log-file -
