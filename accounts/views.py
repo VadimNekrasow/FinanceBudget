@@ -2,7 +2,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import authenticate, login
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import UpdateView, CreateView
 
 from .forms import LoginForm, UserForm, SignupForm
@@ -21,7 +21,8 @@ class UserLoginView(LoginView):
         return super().get(request, *args, **kwargs)
 
 
-class UserUpdateView(UpdateView):
+class UserUpdateView(LoginRequiredMixin, UpdateView):
+    login_url =  reverse_lazy('a-login')
     form_class = UserForm
     template_name = 'accounts/profile.html'
     success_url = reverse_lazy('a-profile-update')

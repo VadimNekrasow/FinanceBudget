@@ -6,8 +6,8 @@ from uuid import uuid4
 
 # Create your models here.
 
-class Project(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+def get_system_category(type_pay):
+    return Category.objects.get_or_create(type_pay=type_pay, name='Прочее', user_id=None)[0].id
 
 
 class Category(models.Model):
@@ -18,8 +18,9 @@ class Category(models.Model):
     def __str__(self):
         return self.name  # + " | " + self.get_type_pay_display()
 
-    # class Meta:
-    #    ordering = ['name', 'type_pay']
+    def delete(self, using=None, keep_parents=False):
+        Operation.objects.filter(category_id=self.id).update(category_id=get_system_category(self.type_pay))
+        return super().delete(using=None, keep_parents=False)
 
 
 class Operation(models.Model):

@@ -118,28 +118,28 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 #STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 
-if DEBUG:
-    LOGGING = {
-        'version': 1,
-        'filters': {
-            'require_debug_true': {
-                '()': 'django.utils.log.RequireDebugTrue',
-            }
-        },
-        'handlers': {
-            'console': {
-                'level': 'DEBUG',
-                'filters': ['require_debug_true'],
-                'class': 'logging.StreamHandler',
-            }
-        },
-        'loggers': {
-            'django.db.backends': {
-                'level': 'DEBUG',
-                'handlers': ['console'],
-            }
-        }
-    }
+# if DEBUG:
+#     LOGGING = {
+#         'version': 1,
+#         'filters': {
+#             'require_debug_true': {
+#                 '()': 'django.utils.log.RequireDebugTrue',
+#             }
+#         },
+#         'handlers': {
+#             'console': {
+#                 'level': 'DEBUG',
+#                 'filters': ['require_debug_true'],
+#                 'class': 'logging.StreamHandler',
+#             }
+#         },
+#         'loggers': {
+#             'django.db.backends': {
+#                 'level': 'DEBUG',
+#                 'handlers': ['console'],
+#             }
+#         }
+#     }
 
 if not DEBUG:
     MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
