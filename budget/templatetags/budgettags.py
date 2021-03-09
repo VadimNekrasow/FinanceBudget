@@ -5,7 +5,7 @@ from ..forms import OperationForm
 register = template.Library()
 
 
-@register.inclusion_tag('budget/include/form_finance.html')
+@register.simple_tag(name='form')
 def form_finance(*args):
     form = OperationForm()
-    return {'form': form}
+    return form

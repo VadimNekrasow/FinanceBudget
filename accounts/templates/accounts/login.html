@@ -4,9 +4,8 @@
 
 {% block content %}
 <div class="row mt-5">
-    <div class="col-12 col-md-6 mx-auto">
+    <div class="col-12 col-md-8 mx-auto">
         <div class="shadow p-5">
-
             <h2>Вход</h2>
 
             <form method="post">
@@ -28,7 +27,7 @@
                 </div>
                 {% endfor %}
                 {% endif %}
-                <input type="submit" class="btn btn-outline-success btn-block mt-3" value="Вход">
+                <input type="submit" class="btn btn-outline-primary btn-block mt-3" value="Вход">
                 <p class="text-center"><small>Нет аккаунта? <a href="{% url 'a-signup' %}">Создайте</a></small></p>
             </form>
 

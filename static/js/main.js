@@ -255,4 +255,7 @@ function sum(array){
     return array.reduce(reducer);
 }
 
+function open_modal_dialog(){
+    $('#modal-finance').modal('show');
+}
 

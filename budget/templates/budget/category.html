@@ -10,7 +10,6 @@
     <div class="col-9 col-md-3 ml-md-auto mb-2">
         <h4>Мои категории</h4>
         <ul class="list-group">
-            {% if category_list %}
             {% for category in category_list %}
             <a href="#!"
                class="list-group-item list-group-item-action {% if category.type_pay%}text-success{%else%}text-danger{%endif%}">{{category}}
@@ -19,10 +18,9 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </a>
+            {% empty %}
+                <p class="text-muted">У Вас нет категорий</p>
             {% endfor %}
-            {% else %}
-            <p class="text-muted">У Вас нет категорий</p>
-            {% endif %}
         </ul>
     </div>
     <div class="col-9 col-md-6 mr-md-auto  v-divider">

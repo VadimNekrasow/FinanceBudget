@@ -9,23 +9,16 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <title>{% block title %} FinanceBudget {% endblock title %}</title>
 </head>
-<body class="d-flex flex-column min-vh-100">
-<div id="app">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<body>
+<div id="app" class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-light border-bottom shadow-sm">
+        <a class="navbar-brand" href="/"><span class="logo">FinanceBudget</span></a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample08"
                 aria-controls="navbarsExample08" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
-        <div class="collapse navbar-collapse justify-content-md-center" id="navbarsExample08">
-            <ul class="navbar-nav">
-                <a class="navbar-brand" href="/"><span class="logo">FinanceBudget</span></a>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'b-list-operation' %}">Мои финансы</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'b-family' %}">Моя семья</a>
-                </li>
+        <div class="collapse navbar-collapse " id="navbarsExample08">
+            <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle"
                        href="#" id="dropdown08"
@@ -45,9 +38,18 @@
                         {% endif %}
                     </div>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {%if request.path in link_myfinance%}text-dark{%endif%}"
+                       href="{% url 'b-list-operation' %}">Мои финансы</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {%if request.path in link_myfamily%}text-dark{%endif%}"
+                       href="{% url 'b-family' %}">Моя семья</a>
+                </li>
             </ul>
         </div>
     </nav>
+
 
     <div class="container mt-3">
         {% block content %}
@@ -55,80 +57,33 @@
         {% endblock content %}
     </div>
 
+    {% if request.user.is_authenticated %}
+    <a href="#" class="btn btn-primary panel" onclick="open_modal_dialog()">Добавить</a>
+    {% endif %}
+
+
     <!-- Modal -->
+    {% include 'budget/include/form_finance.html' %}
+    <footer class="container py-5 mt-auto">
+        <hr>
+        <div class="row">
+            <div class="col-12 col-md-9">
+                <a class="navbar-brand" href="/"><span class="logo-footer">FinanceBudget</span></a>
+                <small class="d-block mb-3 text-muted">&copy; {% now 'Y' %}</small>
+            </div>
 
-    <div class="modal" id="modal-dialog-form" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenteredLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalCenteredLabel">Мои финансы</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-
-                </div>
-
-                {% comment %}
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-outline-success">Сохранить</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Закрыть</button>
-                </div>
-                {% endcomment %}
+            <div class="col-6 col-md-3">
+                <h5>О сайте</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="text-muted" href="https://github.com/VadimNekrasow/FinanceBudget">Исходный код</a>
+                    </li>
+                </ul>
             </div>
         </div>
-    </div>
+    </footer>
 </div>
 
-<footer class="container py-5 mt-auto">
-    <hr>
-    <div class="row">
-        <div class="col-12 col-md">
-            <a class="navbar-brand" href="/"><span class="logo">FinanceBudget</span></a>
-            <small class="d-block mb-3 text-muted">&copy; {% now 'Y' %}</small>
-        </div>
-        <div class="col-6 col-md">
-            <h5>Финансы</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="text-muted" href="{% url 'b-list-operation' %}">Мои финансы</a></li>
-                <li><a class="text-muted" href="{% url 'b-category' %}">Категории</a></li>
-                <li><a class="text-muted" href="{% url 'b-chart' %}">Графическая сводка</a></li>
-            </ul>
-        </div>
-        <div class="col-6 col-md">
-            <h5>Семья</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="text-muted" href="{% url 'b-family' %}">Моя семья</a></li>
-                <li><a class="text-muted" href="{% url 'b-family-operation' %}">Семейные финансы</a></li>
-            </ul>
-        </div>
-        <div class="col-6 col-md">
-            <h5>Аккаунт</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="text-muted" href="{% url 'a-profile-update' %}">Мой профиль</a></li>
-                <li><a class="text-muted" href="{% url 'a-signup' %}">Регистрация</a></li>
-                <li><a class="text-muted" href="{% url 'a-login' %}">Вход</a></li>
-            </ul>
-        </div>
-        <div class="col-6 col-md">
-            <h5>О сайте</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="text-muted" href="https://github.com/VadimNekrasow/FinanceBudget">Исходный код</a></li>
-            </ul>
-        </div>
-    </div>
-</footer>
 
-
-<!--
-<footer class="footer mt-auto pb-3">
-    <div class="container">
-        <hr>
-        <span class="text-muted">Place sticky footer content here.</span>
-    </div>
-</footer>-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"
         integrity="sha512-hZf9Qhp3rlDJBvAKvmiG+goaaKRZA6LKUO35oK6EsM0/kjPK32Yw7URqrq3Q+Nvbbt8Usss+IekL7CRn83dYmw=="
         crossorigin="anonymous"></script>

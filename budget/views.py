@@ -284,6 +284,10 @@ class OperationCreate(LoginRequiredMixin, CreateView):
         form.instance.user_id = self.request.user.id
         return super().form_valid(form)
 
+    def get_success_url(self):
+        pprint(self.request.get_full_path())
+        return self.request.POST.get('next', self.success_url)
+
 
 class OperationListView(LoginRequiredMixin, MonthArchiveView):
     login_url = reverse_lazy('a-login')

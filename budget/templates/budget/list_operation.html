@@ -18,9 +18,6 @@
                 class="form-control"
                 onchange="month_change(this.value, '{{request.path}}')">
             </div>
-            <div class="ml-2">
-                <a href="{% url 'b-operation-create'%}">Добавить</a>
-            </div>
         </div>
 
         {% if not list_operation %}
