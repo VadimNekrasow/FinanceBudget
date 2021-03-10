@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from .views import index, OperationListView, OperationUpdate, \
+from .views import index, OperationListView, OperationUpdate, FamilyChartView, \
     delete_category, get_data_for_chart, delete_operation, ChartView, FamilyView, CategoryCreateView, \
     get_category_by_ajax, delete_user_from_family, DeleteFamilyView, family_operation_view, OperationCreate
 
@@ -21,6 +21,7 @@ urlpatterns = [
     path('family/user/<int:pk>/remove/', delete_user_from_family, name='b-family-delete-user'),
     path('family/operation/', family_operation_view, name='b-family-operation'),
     path('family/delete/', DeleteFamilyView.as_view(), name='b-family-delete'),
+    path('family/chart/', FamilyChartView.as_view(), name='b-family-chart'),
     path('family/', FamilyView.as_view(), name='b-family'),
 
     path('', index, name='b-index'),

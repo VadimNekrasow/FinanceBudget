@@ -147,12 +147,6 @@ if (document.getElementById('app-statistic')){
                                     total = sum(context.dataset.data)
                                     return Math.round(value / total * 100, 2) + '%';
                                }
-//                                formatter: function(value, context) {
-//                                          total = sum(context.dataset.data)
-//                                          return context.active
-//                                            ? Math.round(value / total * 100, 2) + '%'
-//                                            : Math.round(value);
-//                                        },
                             }
                         }
                     }
@@ -209,27 +203,142 @@ if (document.getElementById('app-statistic')){
 });
 }
 
-/*var app = new Vue({
-    el: '#app',
-    data: {
-        state_type_pay: 0,
-        options: [],
-
-    },
-    methods: {
-        open_modal_dialog(){
-            $('#modal-dialog-form').modal('show');
-            this.changed_type_pay();
+if (document.getElementById('family-chart')){
+    var app_statistic = new Vue({
+        el: '#family-chart',
+        data: {
+            state_calendar: 0,
+            state_radio: 0,
+            chart: null,
+            data_is_empty: false,
+            calendar_date: null,
         },
-        changed_type_pay(){
-                var request = sendRequest('/ajax/category/?type_pay=' + this.state_type_pay + '', 'get').then((response)=>{
-                this.options = response.data.categories;
-                })
-         }
-    },
-});*/
+        methods: {
+            get_format(){
+                 var get_parameters = '';
+                 if (this.state_calendar=='1'){
+                    get_parameters += '?year=' + this.calendar_date;
+                 }else{
+                    date = this.calendar_date.split('-');
+                    get_parameters += '?year=' + date[0] + '&month=' + date[1];
+                 }
+                 get_parameters += '&type_pay=' + this.state_radio;
+                 return get_parameters;
+            },
+            current_date(){
+                var now = new Date();
+                return (now.toLocaleString("en-US", {year: 'numeric'}) + '-' +now.toLocaleString("en-US", {month: '2-digit'}));
+            },
+            current_year(){
+                var now = new Date();
+                return (now.toLocaleString('en-Us', {year: 'numeric'}));
+            },
+            create_chart(){
+                var ctx = document.getElementById('chart')//.getContext('2d');
+                this.chart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['1', '2', '3'],
+                        datasets: [{
+                            label: '',
+                            data: [1, 3, 5],
+                            backgroundColor: ['red', 'blue', 'green'],
+                    },
+                    {
+                         label: '',
+                         data: [1, 3, 5],
+                         backgroundColor: ['red', 'blue', 'green'],
+                    },
 
 
+                    ]},
+                    options: {
+                        responsive: true,
+                        legend: {
+                            position: 'left',
+                            labels: {
+                                fontSize: 14,
+
+                            },
+                        },
+                        plugins: {
+                            datalabels: {
+                                padding: {
+                                    left: 5,
+                                    right: 5,
+                                },
+                                font: {
+                                    size: 14,
+                                },
+                                color: '#fff',
+                                offset: -10,
+                                borderWidth: 1,
+                                borderRadius: 25,
+
+                                borderColor: '#fff',
+                                backgroundColor: (context) => {
+                                    return context.dataset.backgroundColor
+                                 },
+
+                               formatter: function(value, context) {
+                                    total = sum(context.dataset.data)
+                                    return Math.round(value / total * 100, 2) + '%';
+                               }
+                            }
+                        }
+                    }
+
+                });
+                this.update_chart();
+            },
+
+            radio_changed(){
+                this.update_chart();
+            },
+
+            type_date_changed(){
+                if (this.state_calendar=='1'){
+                    this.calendar_date = this.current_year();
+                }else{
+                    this.calendar_date = this.current_date();
+                }
+                this.update_chart();
+            },
+
+            date_change(){
+                this.update_chart();
+            },
+
+            update_chart(){
+                sendRequest('/ajax/chart/' + this.get_format(), 'get').then((response)=>{
+                    if (response.data.data.length > 0){
+                        this.data_is_empty = false;
+                    }else{
+                        this.data_is_empty = true;
+                    }
+
+                    this.chart.data.labels = [];
+                    this.chart.data.datasets[0].data = [];
+                    this.chart.data.datasets[0].backgroundColor = [];
+
+                    for (var item in response.data.data){
+                        item = response.data.data[item]
+                        this.chart.data.labels.push(item.category__name);
+                        this.chart.data.datasets[0].data.push(parseFloat(item.total));
+                        this.chart.data.datasets[0].backgroundColor.push(item.color);
+                    }
+                    this.chart.update();
+
+                });
+            },
+        },
+        mounted(){
+            this.calendar_date = this.current_date();
+            this.create_chart();
+        }
+
+});
+}
 
 function sendRequest(url, method, data){
     var request = axios({

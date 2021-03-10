@@ -25,8 +25,6 @@ colors = [
 
 
 # Create your views here.
-
-
 def get_category_by_ajax(request):
     """Получение категорий по ajax"""
     if request.user.is_anonymous:
@@ -175,6 +173,11 @@ def get_data_for_chart(request):
 class ChartView(LoginRequiredMixin, TemplateView):
     login_url = reverse_lazy('a-login')
     template_name = 'budget/chart.html'
+
+
+class FamilyChartView(LoginRequiredMixin, TemplateView):
+    login_url = reverse_lazy('a-login')
+    template_name = 'budget/chart_family.html'
 
 
 def delete_category(request, pk):
