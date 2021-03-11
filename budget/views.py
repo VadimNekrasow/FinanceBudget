@@ -37,6 +37,43 @@ def get_category_by_ajax(request):
         return JsonResponse({'categories': categories}, status=200)
 
 
+def get_operation_by_ajax(request):
+    if request.user.is_anonymous:
+        raise PermissionDenied
+
+    date_str_format = request.GET.get('month', datetime.datetime.now().strftime('%Y-%m'))
+    year, month = map(int, date_str_format.split('-'))
+
+    operations = Operation.objects.filter(user_id=request.user.id,
+                                          date__month=month,
+                                          date__year=year)
+
+    total = operations.filter(category__type_pay=1).aggregate(total=Sum('value'))['total']
+    total_cost = operations.filter(category__type_pay=0).aggregate(total=Sum('value'))['total']
+    if total is None:
+        total = 0
+    if total_cost is None:
+        total_cost = 0
+    total -= total_cost
+
+    print(operations)
+    operations = operations.values('id', 'value', 'description',
+                                   'category__type_pay',
+                                   'category__name', 'date').order_by('-date', '-id')
+    return JsonResponse({'operations': list(operations), 'total': total})
+
+
+class OperationView(LoginRequiredMixin, TemplateView):
+    login_url = reverse_lazy('a-login')
+    template_name = 'budget/list_operation_js.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        categories = Category.objects.filter(Q(user_id=None) | Q(user_id=self.request.user.id)).values('id', 'name')
+        context.update({'categories': categories})
+        return context
+
+
 # def family_view(request):
 #     if request.user.is_anonymous:
 #         return redirect('/')

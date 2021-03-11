@@ -39,6 +39,10 @@
                     </div>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link"
+                       href="{% url 'b-list-operation' %}">Мои финансы</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {%if request.path in link_myfinance%}text-dark{%endif%}"
                        href="{% url 'b-list-operation' %}">Мои финансы</a>
                 </li>

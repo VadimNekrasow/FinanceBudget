@@ -20,10 +20,6 @@
             </div>
         </div>
 
-        {% if not list_operation %}
-            <hr>
-            <h3 class="font-weight-light">Операции за выбранный месяц отсутствуют</h3>
-        {% endif %}
         {% for operation in list_operation %}
         {% ifchanged operation.date %}
         <h5 class="bg-info p-2 text-dark my-2">{{operation.date}}</h5>
@@ -51,6 +47,9 @@
                 <p>{{operation.description|default:operation.category.name}}</p>
             </div>
         </div>
+        {% empty %}
+            <hr>
+            <h3 class="font-weight-light">Операции за выбранный месяц отсутствуют</h3>
         {% endfor %}
     </div>
 </div>

@@ -2,13 +2,16 @@ from django.urls import path, include
 
 from .views import index, OperationListView, OperationUpdate, FamilyChartView, \
     delete_category, get_data_for_chart, delete_operation, ChartView, FamilyView, CategoryCreateView, \
-    get_category_by_ajax, delete_user_from_family, DeleteFamilyView, family_operation_view, OperationCreate
+    get_category_by_ajax, delete_user_from_family, DeleteFamilyView, family_operation_view, OperationCreate, \
+    OperationView, get_operation_by_ajax
 
 urlpatterns = [
+    path('ajax/operations/', get_operation_by_ajax),
     path('ajax/<int:pk>/delete/', delete_category, name='b-ajax-delete-operation'),
     path('ajax/chart/', get_data_for_chart),
     path('ajax/category/', get_category_by_ajax),
 
+    path('operation/js/', OperationView.as_view()),
     path('operation/chart/', ChartView.as_view(), name='b-chart'),
     path('operation/add/', OperationCreate.as_view(), name='b-operation-create'),
     path('operation/<int:pk>/delete/', delete_operation, name='b-operation-delete'),  # is_ajax
