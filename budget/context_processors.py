@@ -13,5 +13,6 @@ def link_of_my_family(request):
     return {'link_myfamily':
                 [reverse_lazy('b-family'),
                  reverse_lazy('b-family-operation'),
+                 reverse_lazy('b-family-chart'),
                  ]
             }

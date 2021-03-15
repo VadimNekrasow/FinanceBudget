@@ -2,14 +2,10 @@
     <div class="container py-1">
         {% if request.user == operation.user %}
         <div>
-            <button type="button"
-                    class="close"
-                    data-dismiss="alert"
-                    aria-label="Close">
-                <span aria-hidden="true"><i class="bi bi-x-circle red-hover"></i></span>
-            </button>
-            <a class="close mr-1" href="{% url 'b-operation-update' operation.id %}">
-                <span aria-hidden="true"><i class="bi bi-pencil"></i></span>
+            <a href="#" onclick="delete_operation({{operation.id}})" class="close"><i class="bi bi-x-circle red-hover"></i></a>
+
+            <a class="close mr-1" href="{% url 'b-operation-delete' operation.id %}">
+                <i class="bi bi-pencil"></i>
             </a>
         </div>
         {% endif %}

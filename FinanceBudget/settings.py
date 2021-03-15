@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '_7w*(zuf0n$6^hpc#-sxmrj7p&xhls33lr@2ikfw&o+t0cilhl'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', 'dj-finance-budget.herokuapp.com']
 
@@ -117,7 +117,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 #STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+#STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 
 # if DEBUG:
@@ -143,9 +143,13 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 #         }
 #     }
 
+if DEBUG:
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
 if not DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
     MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
-    # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
     #import dj_database_url
     #DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)

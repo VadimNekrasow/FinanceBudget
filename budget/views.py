@@ -4,10 +4,9 @@ from pprint import pprint
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.http import JsonResponse, Http404
-from django.views.generic import ListView, UpdateView, CreateView, View, TemplateView
-from django.views.generic.base import ContextMixin
+from django.views.generic import UpdateView, CreateView, View, TemplateView
 
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, F
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.dates import MonthArchiveView
 from django.core.exceptions import PermissionDenied
@@ -56,11 +55,44 @@ def get_operation_by_ajax(request):
         total_cost = 0
     total -= total_cost
 
-    print(operations)
     operations = operations.values('id', 'value', 'description',
                                    'category__type_pay',
                                    'category__name', 'date').order_by('-date', '-id')
     return JsonResponse({'operations': list(operations), 'total': total})
+
+
+def get_data_for_chart_family_by_ajax(request):
+    """Получение данных для построения диаграммы. ajax"""
+    if request.user.is_anonymous:
+        raise PermissionDenied
+
+    type_pay = int(request.GET.get('type_pay', 0))
+    year = int(request.GET.get('year', datetime.datetime.now().year))
+    month = int(request.GET.get('month', -1))
+
+    family = Family.objects.get(users=request.user.id)
+    data = Operation.objects.filter(category__type_pay=type_pay,
+                                    user__in=family.users.all())
+    if month == -1:
+        data = data.filter(date__year=year)
+    else:
+        data = data.filter(date__year=year, date__month=month)
+
+    categories = data.values(_category=F('category__name')).annotate(total=Sum('value'))
+    categories = list(categories)
+
+    users = data.values(_user=F('user__username')).annotate(total=Sum('value'))
+    users = list(users)
+
+    for i in range(len(categories)):
+        item = categories[i]
+        item.update({'color': colors[type_pay][i % len(colors[type_pay])]})
+
+    for i in range(len(users)):
+        item = users[i]
+        item.update({'color': colors[type_pay][i % len(colors[type_pay])]})
+
+    return JsonResponse({'categories': categories, 'users': users}, status=200)
 
 
 class OperationView(LoginRequiredMixin, TemplateView):
@@ -128,7 +160,12 @@ def family_operation_view(request):
     if request.user.is_anonymous:
         return redirect('a-login')
 
-    family = Family.objects.get(users=request.user)
+    family = Family.objects.filter(users=request.user)
+    if family.exists():
+        family = family[0]
+    else:
+        return redirect('b-family')
+
     year = int(request.GET.get('year', datetime.datetime.now().year))
     month = int(request.GET.get('month', datetime.datetime.now().month))
 
@@ -216,6 +253,11 @@ class FamilyChartView(LoginRequiredMixin, TemplateView):
     login_url = reverse_lazy('a-login')
     template_name = 'budget/chart_family.html'
 
+    def get(self, request):
+        if not Family.objects.filter(users=request.user).exists():
+            return redirect('b-family')
+        return super().get(request)
+
 
 def delete_category(request, pk):
     """Удаление категории. Вызов происходит при помощи ajax"""
@@ -301,7 +343,6 @@ class OperationUpdate(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         form_data = {'type_pay': self.object.category.type_pay, 'instance': self.object.category_id}
         context.update({'form_data': form_data})
-        pprint(context)
         return context
 
     def get_form_kwargs(self):
@@ -325,7 +366,6 @@ class OperationCreate(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        pprint(self.request.get_full_path())
         return self.request.POST.get('next', self.success_url)
 
 

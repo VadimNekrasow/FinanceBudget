@@ -44,6 +44,20 @@ class Family(models.Model):
                                related_name='author_families')
     uuid = models.UUIDField(default=uuid4, editable=True)
     users = models.ManyToManyField(User, blank=True, related_name='family')
+    # users = models.ManyToManyField(User, through='FamilyUsers', through_fields=('family', 'user'),
+    #                                related_name='family')
 
     def __str__(self):
         return self.name
+
+    # class Meta:
+    #     unique_together = ['users__family', 'users__user']
+
+
+# class FamilyUsers(models.Model):
+#     family = models.ForeignKey(Family, on_delete=models.CASCADE)
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#
+#     class Meta:
+#         db_table = 'budget_family_users'
+#         unique_together = ['family', 'user']

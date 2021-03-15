@@ -6,4 +6,5 @@ from .models import Category, Family, Operation
 admin.site.register(Category)
 admin.site.register(Family)
 admin.site.register(Operation)
+# admin.site.register(FamilyUsers)
 
