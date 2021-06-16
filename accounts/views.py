@@ -3,9 +3,10 @@ from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import PasswordChangeView
 from django.views.generic import UpdateView, CreateView
 
-from .forms import LoginForm, UserForm, SignupForm
+from .forms import LoginForm, UserForm, SignupForm, CustomPasswordChangeForm
 
 
 # Create your views here.
@@ -22,7 +23,7 @@ class UserLoginView(LoginView):
 
 
 class UserUpdateView(LoginRequiredMixin, UpdateView):
-    login_url =  reverse_lazy('a-login')
+    login_url = reverse_lazy('a-login')
     form_class = UserForm
     template_name = 'accounts/profile.html'
     success_url = reverse_lazy('a-profile-update')
@@ -49,3 +50,10 @@ class SignupView(CreateView):
         if auth_user:
             login(self.request, auth_user)
         return form_valid
+
+
+class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+    login_url = reverse_lazy('a-login')
+    template_name = 'accounts/change_password.html'
+    success_url = reverse_lazy('a-profile-update')  # Переадресация при успешной смене
+    form_class = CustomPasswordChangeForm
